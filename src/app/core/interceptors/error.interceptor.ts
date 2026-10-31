@@ -1,23 +1,14 @@
-import { Injectable } from '@angular/core';
-import { HttpRequest, HttpHandler, HttpEvent, HttpInterceptor, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
+import { catchError, throwError } from 'rxjs';
 
-@Injectable()
-export class ErrorInterceptor implements HttpInterceptor {
-
-  constructor() {}
-
-  intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    return next.handle(request).pipe(
-      catchError((error: HttpErrorResponse) => {
-        console.error('HTTP Error caught by Interceptor:', error);
-        // Here you could add more sophisticated error handling, like:
-        // - Sending logs to a remote server
-        // - Transforming the error into a user-friendly message
-        // - Showing a global notification (toast)
-        return throwError(() => error);
-      })
-    );
-  }
-}
+/**
+ * Logs every failed HTTP call in one place and re-throws the error so callers
+ * can still react to it (e.g. by switching to an error state).
+ */
+export const errorInterceptor: HttpInterceptorFn = (request, next) =>
+  next(request).pipe(
+    catchError((error: HttpErrorResponse) => {
+      console.error('HTTP Error caught by Interceptor:', error);
+      return throwError(() => error);
+    }),
+  );

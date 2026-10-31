@@ -17,9 +17,11 @@
               "base": "dist/space-x"
             },
             "index": "src/index.html",
-            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": ["src/favicon.ico", "src/assets"],
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.css"
@@ -58,8 +60,7 @@
             "testing": {
               "aot": false,
               "optimization": false,
-              "extractLicenses": false,
-              "polyfills": ["zone.js", "zone.js/testing"]
+              "extractLicenses": false
             }
           },
           "defaultConfiguration": "production"
