@@ -40,8 +40,13 @@ export interface Launch {
   upcoming: boolean;
 }
 
+export interface GqlError {
+  message: string;
+}
+
 export interface GqlResponse {
-    data: {
-        launches: Launch[];
-    }
+  data: {
+    launches: Launch[] | null;
+  } | null;
+  errors?: GqlError[];
 }
