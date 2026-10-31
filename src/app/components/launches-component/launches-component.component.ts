@@ -6,8 +6,8 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Launch } from 'src/app/core/models/launch.model';
-import { LaunchStateService } from 'src/app/services/launch-state.service';
+import { Launch } from '../../core/models/launch.model';
+import { LaunchStateService } from '../../services/launch-state.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
 import { MatPaginator } from '@angular/material/paginator';

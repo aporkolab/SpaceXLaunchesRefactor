@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 import { LaunchesComponent } from './launches-component.component';
-import { LaunchStateService } from 'src/app/services/launch-state.service';
-import { Launch } from 'src/app/core/models/launch.model';
+import { LaunchStateService } from '../../services/launch-state.service';
+import { Launch } from '../../core/models/launch.model';
 import { MatTableModule } from '@angular/material/table';
 import { MatSortModule } from '@angular/material/sort';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
