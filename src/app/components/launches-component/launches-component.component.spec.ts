@@ -1,3 +1,4 @@
+import type { MockedObject } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BehaviorSubject, of } from 'rxjs';
 import { LaunchesComponent } from './launches-component.component';
@@ -15,7 +16,7 @@ const MOCK_LAUNCHES: Launch[] = [
 describe('LaunchesComponent', () => {
   let component: LaunchesComponent;
   let fixture: ComponentFixture<LaunchesComponent>;
-  let mockLaunchStateService: jasmine.SpyObj<LaunchStateService>;
+  let mockLaunchStateService: MockedObject<LaunchStateService>;
   let launchesSubject: BehaviorSubject<Launch[]>;
   let loadingSubject: BehaviorSubject<boolean>;
   let errorSubject: BehaviorSubject<any>;
@@ -25,18 +26,19 @@ describe('LaunchesComponent', () => {
     loadingSubject = new BehaviorSubject<boolean>(false);
     errorSubject = new BehaviorSubject<any>(null);
 
-    mockLaunchStateService = jasmine.createSpyObj('LaunchStateService', ['fetchLaunches'], {
+    mockLaunchStateService = {
+      fetchLaunches: vi.fn().mockName('LaunchStateService.fetchLaunches'),
       launches$: launchesSubject.asObservable(),
       loading$: loadingSubject.asObservable(),
       error$: errorSubject.asObservable(),
-    });
+    } as unknown as MockedObject<LaunchStateService>;
 
     await TestBed.configureTestingModule({
       declarations: [LaunchesComponent],
       imports: [MatTableModule, MatSortModule, NoopAnimationsModule],
       providers: [
-        { provide: LaunchStateService, useValue: mockLaunchStateService }
-      ]
+        { provide: LaunchStateService, useValue: mockLaunchStateService },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LaunchesComponent);

@@ -1,3 +1,4 @@
+import type { Mock } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
@@ -16,7 +17,7 @@ import { ErrorInterceptor } from './error.interceptor';
 describe('ErrorInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
-  let consoleErrorSpy: jasmine.Spy;
+  let consoleErrorSpy: Mock;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -34,7 +35,7 @@ describe('ErrorInterceptor', () => {
 
     httpMock = TestBed.inject(HttpTestingController);
     httpClient = TestBed.inject(HttpClient);
-    consoleErrorSpy = spyOn(console, 'error').and.callThrough();
+    consoleErrorSpy = vi.spyOn(console, 'error');
   });
 
   afterEach(() => {
@@ -49,7 +50,7 @@ describe('ErrorInterceptor', () => {
     });
 
     httpClient.get(testUrl).subscribe({
-      next: () => fail('should have failed with a 404 error'),
+      next: () => expect.fail('should have failed with a 404 error'),
       error: (error: HttpErrorResponse) => {
         expect(error.status).toEqual(404);
       },
