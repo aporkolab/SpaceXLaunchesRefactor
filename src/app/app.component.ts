@@ -1,12 +1,12 @@
-// app.component.ts
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+
+import { LaunchesComponent } from './components/launches-component/launches-component.component';
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+  selector: 'app-root',
+  imports: [LaunchesComponent],
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  title = 'SpaceX Launches';
-}
+export class AppComponent {}

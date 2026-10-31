@@ -1,41 +1,69 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { Launch } from 'src/app/core/models/launch.model';
-import { LaunchStateService } from 'src/app/services/launch-state.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatSort } from '@angular/material/sort';
-import { MatPaginator } from '@angular/material/paginator';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, viewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+
+import { Launch } from '../../core/models/launch.model';
+import { LaunchStateService } from '../../services/launch-state.service';
+
+export type LaunchColumn = 'mission_name' | 'launch_year' | 'rocket_name' | 'launch_site';
+
+/** Maps a (possibly nested) column to the value the table sorts by. */
+export function launchSortValue(launch: Launch, column: string): string | number {
+  switch (column as LaunchColumn) {
+    case 'rocket_name':
+      return launch.rocket?.rocket_name ?? '';
+    case 'launch_site':
+      return launch.launch_site?.site_name_long ?? '';
+    case 'launch_year':
+      return Number(launch.launch_year) || 0;
+    case 'mission_name':
+      return launch.mission_name ?? '';
+    default:
+      return '';
+  }
+}
 
 @Component({
-    selector: 'app-launches',
-    templateUrl: './launches-component.component.html',
-    styleUrls: ['./launches-component.component.css'],
-    standalone: false
+  selector: 'app-launches',
+  imports: [MatButtonModule, MatTableModule, MatSortModule, MatPaginatorModule, MatProgressSpinnerModule],
+  templateUrl: './launches-component.component.html',
+  styleUrls: ['./launches-component.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LaunchesComponent implements OnInit, AfterViewInit {
-  loading$: Observable<boolean>;
-  error$: Observable<any>;
+export class LaunchesComponent implements OnInit {
+  private readonly launchState = inject(LaunchStateService);
 
-  displayedColumns: string[] = ['mission_name', 'launch_year', 'rocket_name', 'launch_site'];
-  dataSource = new MatTableDataSource<Launch>();
+  readonly loading = this.launchState.loading;
+  readonly hasError = this.launchState.hasError;
+  readonly launches = this.launchState.launches;
 
-  @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  readonly displayedColumns: LaunchColumn[] = ['mission_name', 'launch_year', 'rocket_name', 'launch_site'];
+  readonly dataSource = new MatTableDataSource<Launch>([]);
 
-  constructor(private launchStateService: LaunchStateService) {
-    this.loading$ = this.launchStateService.loading$;
-    this.error$ = this.launchStateService.error$;
-  }
+  // The table lives inside an @if block, so sort/paginator only exist once data is shown.
+  private readonly sort = viewChild(MatSort);
+  private readonly paginator = viewChild(MatPaginator);
 
-  ngOnInit() {
-    this.launchStateService.launches$.subscribe(launches => {
-      this.dataSource.data = launches;
+  constructor() {
+    this.dataSource.sortingDataAccessor = launchSortValue;
+
+    effect(() => {
+      this.dataSource.data = this.launches();
     });
-    this.launchStateService.fetchLaunches();
+    effect(() => {
+      this.dataSource.sort = this.sort() ?? null;
+      this.dataSource.paginator = this.paginator() ?? null;
+    });
   }
 
-  ngAfterViewInit() {
-    this.dataSource.sort = this.sort;
-    this.dataSource.paginator = this.paginator;
+  ngOnInit(): void {
+    this.launchState.fetchLaunches();
+  }
+
+  retry(): void {
+    this.launchState.fetchLaunches();
   }
 }

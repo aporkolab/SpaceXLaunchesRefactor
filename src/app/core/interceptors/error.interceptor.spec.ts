@@ -1,53 +1,48 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { ErrorInterceptor } from './error.interceptor';
+import { HttpClient, HttpErrorResponse, provideHttpClient, withInterceptors } from '@angular/common/http';
 
-describe('ErrorInterceptor', () => {
+import { errorInterceptor } from './error.interceptor';
+
+describe('errorInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
-  let consoleErrorSpy: jasmine.Spy;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [
-        {
-            provide: HTTP_INTERCEPTORS,
-            useClass: ErrorInterceptor,
-            multi: true,
-        },
-        provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting(),
-    ]
-});
-
+      providers: [provideHttpClient(withInterceptors([errorInterceptor])), provideHttpClientTesting()],
+    });
     httpMock = TestBed.inject(HttpTestingController);
     httpClient = TestBed.inject(HttpClient);
-    consoleErrorSpy = spyOn(console, 'error').and.callThrough();
   });
 
   afterEach(() => {
     httpMock.verify();
+    vi.restoreAllMocks();
   });
 
-  it('should catch and log an error', () => {
-    const testUrl = '/test';
-    const mockError = new HttpErrorResponse({
-      status: 404,
-      statusText: 'Not Found',
+  it('logs and re-throws HTTP errors', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    let received: HttpErrorResponse | undefined;
+
+    httpClient.get('/test').subscribe({
+      next: () => expect.fail('request should have failed'),
+      error: (error: HttpErrorResponse) => (received = error),
     });
+    httpMock.expectOne('/test').flush(null, { status: 404, statusText: 'Not Found' });
 
-    httpClient.get(testUrl).subscribe({
-      next: () => fail('should have failed with a 404 error'),
-      error: (error: HttpErrorResponse) => {
-        expect(error.status).toEqual(404);
-      },
-    });
+    expect(received?.status).toBe(404);
+    expect(consoleError).toHaveBeenCalledWith('HTTP Error caught by Interceptor:', received);
+  });
 
-    const req = httpMock.expectOne(testUrl);
-    req.flush(null, mockError);
+  it('passes successful responses through without logging', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    let body: unknown;
 
-    expect(consoleErrorSpy).toHaveBeenCalled();
+    httpClient.get('/ok').subscribe((value) => (body = value));
+    httpMock.expectOne('/ok').flush({ ok: true });
+
+    expect(body).toEqual({ ok: true });
+    expect(consoleError).not.toHaveBeenCalled();
   });
 });
