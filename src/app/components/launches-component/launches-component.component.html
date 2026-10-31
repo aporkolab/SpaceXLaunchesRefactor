@@ -1,49 +1,62 @@
 <div class="container">
   <h1>SpaceX Launches</h1>
 
-  <div *ngIf="loading$ | async" class="spinner-container">
-    <mat-spinner></mat-spinner>
-  </div>
+  @if (loading$ | async) {
+    <div class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
 
-  <div *ngIf="error$ | async" class="error-container">
-    <h2>Error Fetching Data</h2>
-    <p>Could not load launch data. Please try again later.</p>
-  </div>
+  @if (error$ | async) {
+    <div class="error-container">
+      <h2>Error Fetching Data</h2>
+      <p>Could not load launch data. Please try again later.</p>
+    </div>
+  }
 
-  <div *ngIf="!(loading$ | async) && !(error$ | async)" class="table-container">
-    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-
-      <!-- Mission Name Column -->
-      <ng-container matColumnDef="mission_name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Mission Name </th>
-        <td mat-cell *matCellDef="let launch"> {{launch.mission_name}} </td>
-      </ng-container>
-
-      <!-- Launch Year Column -->
-      <ng-container matColumnDef="launch_year">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Year </th>
-        <td mat-cell *matCellDef="let launch"> {{launch.launch_year}} </td>
-      </ng-container>
-
-      <!-- Rocket Name Column -->
-      <ng-container matColumnDef="rocket_name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Rocket Name </th>
-        <td mat-cell *matCellDef="let launch"> {{launch.rocket.rocket_name}} ({{launch.rocket.rocket_type}}) </td>
-      </ng-container>
-
-      <!-- Launch Site Column -->
-      <ng-container matColumnDef="launch_site">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header> Launch Site </th>
-        <td mat-cell *matCellDef="let launch"> {{launch.launch_site.site_name_long}} </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-
-    <mat-paginator [pageSizeOptions]="[5, 10, 20]"
-                   showFirstLastButtons
-                   aria-label="Select page of periodic elements">
-    </mat-paginator>
-  </div>
+  @if (!(loading$ | async) && !(error$ | async)) {
+    <div class="table-container">
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        class="mat-elevation-z8"
+      >
+        <!-- Mission Name Column -->
+        <ng-container matColumnDef="mission_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            Mission Name
+          </th>
+          <td mat-cell *matCellDef="let launch">{{ launch.mission_name }}</td>
+        </ng-container>
+        <!-- Launch Year Column -->
+        <ng-container matColumnDef="launch_year">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Year</th>
+          <td mat-cell *matCellDef="let launch">{{ launch.launch_year }}</td>
+        </ng-container>
+        <!-- Rocket Name Column -->
+        <ng-container matColumnDef="rocket_name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Rocket Name</th>
+          <td mat-cell *matCellDef="let launch">
+            {{ launch.rocket.rocket_name }} ({{ launch.rocket.rocket_type }})
+          </td>
+        </ng-container>
+        <!-- Launch Site Column -->
+        <ng-container matColumnDef="launch_site">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Launch Site</th>
+          <td mat-cell *matCellDef="let launch">
+            {{ launch.launch_site.site_name_long }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons
+        aria-label="Select page of periodic elements"
+      >
+      </mat-paginator>
+    </div>
+  }
 </div>
