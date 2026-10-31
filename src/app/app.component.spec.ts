@@ -1,29 +1,37 @@
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { signal } from '@angular/core';
+
 import { AppComponent } from './app.component';
+import { LaunchStateService } from './services/launch-state.service';
 
 describe('AppComponent', () => {
-  beforeEach(() => TestBed.configureTestingModule({
-    imports: [RouterTestingModule],
-    declarations: [AppComponent]
-  }));
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [AppComponent],
+      providers: [
+        {
+          provide: LaunchStateService,
+          useValue: {
+            launches: signal([]),
+            loading: signal(false),
+            hasError: signal(false),
+            fetchLaunches: vi.fn(),
+          },
+        },
+      ],
+    });
+  });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it(`should have as title 'spaceX'`, () => {
+  it('should render the launches view with its heading', async () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('spaceX');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('spaceX app is running!');
+    expect(compiled.querySelector('h1')?.textContent).toContain('SpaceX Launches');
+    expect(compiled.querySelector('app-launches')).not.toBeNull();
   });
 });
